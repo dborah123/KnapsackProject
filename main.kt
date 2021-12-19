@@ -48,7 +48,7 @@ fun main() {
         }
 
         /* Get number of large boxes */
-        println("How many large boxes?")
+        println("How many large boxes do you have?")
         while (true) {
             print("Enter: ")
 
@@ -103,26 +103,73 @@ fun main() {
             }
         }
 
-        /* Initializing Lists for objects */
+        /* Preparing for knapsack algorithm */
+        val total = dimensions.first * dimensions.first * 12
+        val items = mutableListOf<Any>()
+
+        //TC
         if (!TC.isNullOrBlank()) {
-            val TCObj: TC = TC(3, 5, 10, 1)
+            items.add(
+                TC(3, 5, 5, 1)
+            )
         }
 
         // Large Box
-        var LBoxList: MutableList<Box> = mutableListOf()
-        for (i in 0..numLBoxes!!) LBoxList.add(Box(5, 8, 8, i, large = true))
+        for (i in 0..numLBoxes!!) {
+            items.add(
+                Box(5, 8, 15, i, large = true)
+            )
+        }
 
         // Small Box
-        var SBoxList: MutableList<Box> = mutableListOf()
-        for (i in 0..numSBoxes!!) SBoxList.add(Box(2, 4, 4, i, large = false))
+        for (i in 0..numSBoxes!!) {
+            items.add(
+                Box(2, 4, 8, i, large = false)
+            )
+        }
 
         // Furnaces
-        var FurnaceList: MutableList<Furnace> = mutableListOf()
-        for (i in 0..numFurnaces!!) FurnaceList.add(Furnace(3, 3, 5, i))
+        for (i in 0..numFurnaces!!) {
+            items.add(
+                Furnace(3, 3, 9, i)
+            )
+        }
 
         // Workbench
         if (!workbench.isNullOrBlank()) {
-            val WorkbenchObj: Workbench = Workbench(2, 8, 7, 1)
+            items.add(
+                Workbench(2, 8, 6, 1)
+            )
         }
+
+        /* Knapsack Algorithm */
+        // Initialize array of all 0's for dynamic programming
+        val dpArray: Array<IntArray> = Array(items.size + 1) { IntArray(total + 1) { 0 } }
+        var currItem: Item?
+        var currItemArea: Int
+
+        for (row in 0..dpArray.size) {
+            for (col in 1..dpArray[row].size) {
+                // Normal Case
+                if (row != 0) {
+                    currItem = items[0] as Item
+                    currItemArea = currItem.getArea()
+                    if (currItemArea + dpArray[row-1][col-currItemArea] <= col &&
+                        dpArray[row-1][col] < currItemArea + dpArray[row-1][col-currItemArea]){
+                        dpArray[row][col] = currItemArea + dpArray[row-1][col-currItemArea]
+                    } else {
+                        dpArray[row][col] = dpArray[row-1][col]
+                    }
+
+                // If on first row of array
+                } else {
+                    currItem = items[0] as Item
+                    if (currItem.getArea() <= col) {
+                        dpArray[row][col] = currItem.getArea()
+                    }
+                }
+            }
+        }
+
     }
 }
