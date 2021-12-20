@@ -1,3 +1,5 @@
+import java.lang.Math.max
+
 /*
 
  */
@@ -109,27 +111,31 @@ fun main() {
 
         //TC
         if (!TC.isNullOrBlank()) {
+            println("One TC")
             items.add(
                 TC(3, 5, 5, 1)
             )
         }
 
         // Large Box
-        for (i in 0..numLBoxes!!) {
+        for (i in 1..numLBoxes!!) {
+            println("$numLBoxes Lboxes")
             items.add(
                 Box(5, 8, 15, i, large = true)
             )
         }
 
         // Small Box
-        for (i in 0..numSBoxes!!) {
+        for (i in 1..numSBoxes!!) {
+            println("$numSBoxes Sboxes")
             items.add(
                 Box(2, 4, 8, i, large = false)
             )
         }
 
         // Furnaces
-        for (i in 0..numFurnaces!!) {
+        for (i in 1..numFurnaces!!) {
+            println("$numFurnaces Furn")
             items.add(
                 Furnace(3, 3, 9, i)
             )
@@ -137,6 +143,7 @@ fun main() {
 
         // Workbench
         if (!workbench.isNullOrBlank()) {
+            println("One WB")
             items.add(
                 Workbench(2, 8, 6, 1)
             )
@@ -144,19 +151,24 @@ fun main() {
 
         /* Knapsack Algorithm */
         // Initialize array of all 0's for dynamic programming
-        val dpArray: Array<IntArray> = Array(items.size + 1) { IntArray(total + 1) { 0 } }
+        val dpArray: Array<IntArray> = Array(items.size) { IntArray(total) { 0 } }
+
         var currItem: Item?
         var currItemArea: Int
 
-        for (row in 0..dpArray.size) {
-            for (col in 1..dpArray[row].size) {
+        println("dpArray.size = ${dpArray.indices}, dpArray[0].size = ${dpArray[0].size}")
+
+        for (row in dpArray.indices) {
+            for (col in 1 until dpArray[0].size) {
                 // Normal Case
                 if (row != 0) {
-                    currItem = items[0] as Item
+                    currItem = items[row] as Item
                     currItemArea = currItem.getArea()
-                    if (currItemArea + dpArray[row-1][col-currItemArea] <= col &&
-                        dpArray[row-1][col] < currItemArea + dpArray[row-1][col-currItemArea]){
-                        dpArray[row][col] = currItemArea + dpArray[row-1][col-currItemArea]
+                    if (currItemArea <= col){
+//                        dpArray[row-1][col] < currItem.value + dpArray[row-1][col-currItemArea]
+                        dpArray[row][col] =
+                            (currItem.value + dpArray[row - 1][col - currItemArea])
+                            .coerceAtLeast(dpArray[row - 1][col])
                     } else {
                         dpArray[row][col] = dpArray[row-1][col]
                     }
@@ -171,5 +183,24 @@ fun main() {
             }
         }
 
+        /* Determining what items are in the floor plan */
+        var col: Int = dpArray[0].size - 1
+        var row: Int = dpArray.size - 1
+        var itemToBeCast:Item
+
+        while (col >= 0 && row >= 0) {
+            if (dpArray[row][col] == 0) break
+            if ( row == 0 || dpArray[row][col] > dpArray[row-1][col]) {
+                when (items[row]) {
+                    is TC -> (items[row] as TC).getName()
+                    is Box -> (items[row] as Box).getName()
+                    is Furnace -> (items[row] as Furnace).getName()
+                    else -> (items[row] as Workbench).getName()
+                }
+                col -= (items[row] as Item).getArea()
+            }
+            row -= 1
+        }
+        println("Thanks you!")
     }
 }
