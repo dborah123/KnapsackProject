@@ -1,7 +1,13 @@
 import java.lang.Math.max
 
 /*
-
+ * Knapsack Project
+ *
+ *  My first time coding in Kotlin. Figured putting my algorithms skills to the test would also be
+ * useful. This code uses the Knapsack algorithm to calculate the number of items that are able to
+ * fit in a certain dimension of floor plan. The algorithm is correct, but not for a 2D space like
+ * this. The purpose is not to have this program be of use, but merely to practice Kotlin and
+ * recall an algorithm from CS302
  */
 
 fun getDimensions(): Pair<Int, Int> {
@@ -39,10 +45,9 @@ fun main() {
         while (true) {
             println("Does your floor plan include TC's? y or n")
             print("Enter: ")
-
             TC = readLine()
 
-            if (TC == null || TC.length != 1){
+            if (TC == null || TC.length != 1 || !TC.contains(Regex("([yn])"))){
                 print("Please enter y or n" )
             } else {
                 break
@@ -53,7 +58,6 @@ fun main() {
         println("How many large boxes do you have?")
         while (true) {
             print("Enter: ")
-
             numLBoxes = readLine()?.toInt()
 
             if (numLBoxes != null) {
@@ -98,7 +102,7 @@ fun main() {
 
             workbench = readLine()
 
-            if (TC == null || TC.length != 1) {
+            if (workbench == null || workbench.length != 1 || !workbench.contains(Regex("([yn])"))) {
                 println("Please enter a valid number")
             } else {
                 break
@@ -111,7 +115,6 @@ fun main() {
 
         //TC
         if (!TC.isNullOrBlank()) {
-            println("One TC")
             items.add(
                 TC(3, 5, 5, 1)
             )
@@ -119,31 +122,27 @@ fun main() {
 
         // Large Box
         for (i in 1..numLBoxes!!) {
-            println("$numLBoxes Lboxes")
             items.add(
-                Box(5, 8, 15, i, large = true)
+                Box(5, 8, 15, numLBoxes-i, large = true)
             )
         }
 
         // Small Box
         for (i in 1..numSBoxes!!) {
-            println("$numSBoxes Sboxes")
             items.add(
-                Box(2, 4, 8, i, large = false)
+                Box(2, 4, 8, numSBoxes-i, large = false)
             )
         }
 
         // Furnaces
         for (i in 1..numFurnaces!!) {
-            println("$numFurnaces Furn")
             items.add(
-                Furnace(3, 3, 9, i)
+                Furnace(3, 3, 9, numFurnaces-i)
             )
         }
 
         // Workbench
         if (!workbench.isNullOrBlank()) {
-            println("One WB")
             items.add(
                 Workbench(2, 8, 6, 1)
             )
@@ -156,7 +155,6 @@ fun main() {
         var currItem: Item?
         var currItemArea: Int
 
-        println("dpArray.size = ${dpArray.indices}, dpArray[0].size = ${dpArray[0].size}")
 
         for (row in dpArray.indices) {
             for (col in 1 until dpArray[0].size) {
@@ -186,21 +184,27 @@ fun main() {
         /* Determining what items are in the floor plan */
         var col: Int = dpArray[0].size - 1
         var row: Int = dpArray.size - 1
-        var itemToBeCast:Item
+
+        var resultsList: Array<Any>
 
         while (col >= 0 && row >= 0) {
             if (dpArray[row][col] == 0) break
             if ( row == 0 || dpArray[row][col] > dpArray[row-1][col]) {
                 when (items[row]) {
-                    is TC -> (items[row] as TC).getName()
-                    is Box -> (items[row] as Box).getName()
-                    is Furnace -> (items[row] as Furnace).getName()
-                    else -> (items[row] as Workbench).getName()
+                    is TC -> println((items[row] as TC).getName())
+                    is Box -> println((items[row] as Box).getName())
+                    is Furnace -> println((items[row] as Furnace).getName())
+                    else -> println((items[row] as Workbench).getName())
                 }
                 col -= (items[row] as Item).getArea()
             }
             row -= 1
         }
-        println("Thanks you!")
+
+        print("Would you like to run again? y or n:")
+        if (readLine() == "n"){
+            println("\nThank you!")
+            break
+        }
     }
 }

@@ -4,7 +4,8 @@ class Box (length:Int, width:Int, value:Int, numItem:Int, contents:String = "", 
     val large = large
     
     fun getName(): String {
-        return "Large Box #$numItem"
+        if (large) return "Large Box #$numItem"
+        return "Small Box #$numItem"
     }
     
     fun getDetails(): String {
